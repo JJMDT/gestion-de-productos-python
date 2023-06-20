@@ -11,68 +11,96 @@ def guardar_productos(productos):
     with open('productos.json', 'w') as archivo:
         json.dump(productos, archivo)
 
-def ingresar_producto(productos, contador):
-    print('*** INGRESAR PRODUCTO ***')
+
+def ingresar_producto(productos,contador):
+    id = str(contador)
+    print (f'el ID para este producto es el {id}')
     nombre = input('Ingrese el nombre del producto: ')
     marca = input('Ingrese la marca del producto: ')
     presentacion = input('Ingrese la presentación del producto: ')
     precio = float(input('Ingrese el precio del producto: '))
     stock = int(input('Ingrese el stock del producto: '))
-
-    productos[contador] = {
-        'nombre': nombre,
-        'marca': marca,
-        'presentacion': presentacion,
-        'precio': precio,
-        'stock': stock
-    }
-
+    productos[id] = {'nombre': nombre, 'marca': marca, 'presentacion': presentacion, 'precio': precio, 'stock': stock}
     guardar_productos(productos)
-    print('Producto ingresado correctamente. ✔')
-    contador += 1
-    return contador
+    print(f'Producto fue ingresado con ID {id}. ✔')
+    return contador + 1
 
 def modificar_producto(productos):
-    print('*** MODIFICAR PRODUCTO ***')
+    print('*** MODIFICAR PRODUCTO ****')
 
-    codigo = int(input('Ingrese el código del producto a modificar: '))
+    codigo = input('Ingrese el código del producto a modificar: ')
     if codigo not in productos:
-        print('El código del producto no existe. ❗❗❗')
+        print('El código no existe.')
         return
+    print('Valores actuales del producto:')
+    print(f"Nombre: {productos[codigo]['nombre']}")
+    print(f"Marca: {productos[codigo]['marca']}")
+    print(f"Presentación: {productos[codigo]['presentacion']}")
+    print(f"Precio: {productos[codigo]['precio']}")
+    print(f"Stock: {productos[codigo]['stock']}")
+    print()
 
-    producto = productos[codigo]
-    print('Ingrese los nuevos datos del producto (deje en blanco si no desea modificar): ')
-    nombre = input(f'Nombre actual: {producto["nombre"]}. Nuevo nombre: ')
-    marca = input(f'Marca actual: {producto["marca"]}. Nueva marca: ')
-    presentacion = input(f'Presentación actual: {producto["presentacion"]}. Nueva presentación: ')
-    precio = input(f'Precio actual: {producto["precio"]}. Nuevo precio: ')
-    stock = input(f'Stock actual: {producto["stock"]}. Nuevo stock: ')
-
-    if nombre != '':
-        producto['nombre'] = nombre
-    if marca != '':
-        producto['marca'] = marca
-    if presentacion != '':
-        producto['presentacion'] = presentacion
-    if precio != '':
-        producto['precio'] = float(precio)
-    if stock != '':
-        producto['stock'] = int(stock)
+    while True:
+        print ('¿Qué desea modificar?')
+        print ('[1] Nombre')
+        print ('[2] Marca')
+        print ('[3] Presentacion')
+        print ('[4] Precio')
+        print ('[5] Stock')
+        print ('[6] Todo')
+        print ('[0] Finalizar')
+        opcion = int(input('Ingrese una opcion: '))
+        match opcion:
+            case 1:
+                nombre = input('Ingrese el nuevo nombre del producto: ')
+                productos[codigo]['nombre'] = nombre
+            case 2:
+                marca = input('Ingrese la nueva marca del producto: ')
+                productos[codigo]['marca'] = marca
+            case 3:
+                presentacion = input('Ingrese la nueva presentacion del producto: ')
+                productos[codigo]['presentacion'] = presentacion
+            case 4:
+                precio = float(input('Ingrese el nuevo precio: '))
+                productos[codigo]['precio'] = precio
+            case 5:
+                stock = int(input('Ingrese el nuevo stock: '))
+                productos[codigo]['stock'] = stock
+            case 6:
+                nombre = input('Ingrese el nuevo nombre del producto: ')
+                productos[codigo]['nombre'] = nombre
+                marca = input('Ingrese la nueva marca del producto: ')
+                productos[codigo]['marca'] = marca
+                presentacion = input('Ingrese la nueva presentacion del producto: ')
+                productos[codigo]['presentacion'] = presentacion
+                precio = float(input('Ingrese el nuevo precio: '))
+                productos[codigo]['precio'] = precio
+                stock = int(input('Ingrese el nuevo stock: '))
+                productos[codigo]['stock'] = stock
+            case 0:
+                break
+            case other:
+                print("Error! ❌ Ingrese una opcion valida")
 
     guardar_productos(productos)
-    print('Producto modificado correctamente. ✔')
+    print('Producto modificado. ✔ ')
 
 def eliminar_producto(productos):
-    print('*** ELIMINAR PRODUCTO ***')
+    print('*** ELIMINAR PRODUCTO ****')
 
-    codigo = int(input('Ingrese el código del producto a eliminar: '))
+    print('Listado de productos:')
+    for codigo, producto in productos.items():
+        print(f"{codigo}: {producto['nombre']}")
+    print()
+    codigo = input('Ingrese el código del producto a eliminar o 0 para cancelar: ')
     if codigo not in productos:
-        print('El código del producto no existe. ❗❗❗')
+        print('El código no existe.')
         return
-
     del productos[codigo]
+  
     guardar_productos(productos)
-    print('Producto eliminado correctamente. ✔')
+    print('Producto eliminado. ✔')
+
 
 def mostrar_reportes(productos):
     print('*** REPORTES ***')
