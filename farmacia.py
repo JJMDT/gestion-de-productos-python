@@ -1,40 +1,41 @@
 import json
-from getpass import getpass
 
 
-def guardar_usuarios(usuarios):
+def guardar_usuarios(usuarios): #guarda los usuarios en el archivo usuarios.json
     with open('usuarios.json', 'w') as archivo:
         json.dump(usuarios, archivo)
 
-def cargar_usuarios():
+def cargar_usuarios(): #carga los datos de los usuarios y son cargados en usuarios.json
     try:
         with open('usuarios.json', 'r') as archivo:
             return json.load(archivo)
     except FileNotFoundError:
         return {}
-def crear_usuario():
+def crear_usuario(): #crear un usuario nuevo
     usuarios = cargar_usuarios()
     contador = len(usuarios) + 1  # Obtenemos el valor del contador sumándole 1 a la cantidad de usuarios existentes
     dni = input('Ingrese su DNI: ')
-    if dni in [usuario['dni'] for usuario in usuarios.values()]:
+    if dni in [usuario['dni'] for usuario in usuarios.values()]: # Verifica si el DNI ingresado ya existe en el diccionario de usuarios.
         print('Error! ❌ Ya se encuentra registrado.')
         pantalla_inicio()
     nombre = input('Ingrese su nombre: ')
     apellido = input('Ingrese su apellido: ')
     while True:
         nombre_usuario = input('Ingrese un nombre de usuario: ')
-        if nombre_usuario in usuarios:
-            print('El nombre de usuario ya existe. Intente nuevamente.')
+        
+        if nombre_usuario in [usuario['nombre_usuario'] for usuario in usuarios.values()]: # Verifica si el nombre de usuario ingresado ya existe en el diccionario de usuarios.
+
+            print('El nombre de usuario ya existe, intente con otro nombre de usuario.')
         else:
             break
     password = input('Ingrese su contraseña: ')
-    identificador = str(contador)  # Convertimos el contador a una cadena para usarlo como identificador
-    usuarios[identificador] = {'nombre': nombre, 'apellido': apellido, 'dni': dni, 'nombre_usuario': nombre_usuario, 'password': password}
+    ID = str(contador)  # ID de cada usuario en la lista usuarios
+    usuarios[ID] = {'nombre': nombre, 'apellido': apellido, 'dni': dni, 'nombre_usuario': nombre_usuario, 'password': password}
     guardar_usuarios(usuarios)
     print('Usuario creado. ✔ ')
     pantalla_inicio()
 
-def iniciar_sesion():
+def iniciar_sesion(): #iniciar sesion con los datos del usuario
     usuarios = cargar_usuarios()
     nombre_usuario = input('Ingrese su nombre de usuario: ')
     encontrado = False
@@ -58,19 +59,45 @@ def iniciar_sesion():
 
 
 #seccion de productos
-def cargar_productos():
+def cargar_productos(): #carga los datos de los productos y son cargados en productos.json
     try:
         with open('productos.json', 'r') as archivo:
             return json.load(archivo)
     except FileNotFoundError:
         return {}
 
-def guardar_productos(productos):
+def guardar_productos(productos): #guarda los productos en el archivo productos.json
     with open('productos.json', 'w') as archivo:
         json.dump(productos, archivo)
+def menu_productos():
+    print('*** GESTION DE PRODUCTOS ***')
 
+    productos = cargar_productos()
+    contador = max([int(id) for id in productos.keys()], default=0) + 1
+    while True:
+        print('[1] Agregar producto')
+        print('[2] Modificar producto')
+        print('[3] Eliminar producto')
+        print('[4] Reportes')
+        print('[0] Atras')
+        opcion = int(input('Ingrese una opcion '))
+        match opcion:
+          case 1:
+            contador = ingresar_producto(productos, contador)
+          case 2:
+            modificar_producto(productos)
+          case 3:
+            eliminar_producto(productos)
+          case 4:
+           mostrar_reportes(productos)
 
-def ingresar_producto(productos,contador):
+          case 0:
+            menu()
+          case other:
+                 print("Error! ❌ Ingrese una opcion valida")
+carrito = {}
+
+def ingresar_producto(productos,contador): #crea un nuevo un producto en la lista productos.js
     id = str(contador)
     print (f'el ID para este producto es el {id}')
     nombre = input('Ingrese el nombre del producto: ')
@@ -83,7 +110,7 @@ def ingresar_producto(productos,contador):
     print(f'Producto fue ingresado con ID {id}. ✔')
     return contador + 1
 
-def modificar_producto(productos):
+def modificar_producto(productos): #modifica un producto de la lista productos.js
     print('*** MODIFICAR PRODUCTO ****')
     print('Listado de productos:')
     for codigo, producto in productos.items():
@@ -147,7 +174,7 @@ def modificar_producto(productos):
     guardar_productos(productos)
     print('Producto modificado. ✔ ')
 
-def eliminar_producto(productos):
+def eliminar_producto(productos): #elimina un producto de la lista productos.js
     print('*** ELIMINAR PRODUCTO ****')
 
     print('Listado de productos:')
@@ -158,6 +185,7 @@ def eliminar_producto(productos):
     if codigo not in productos:
         print('El código no existe.')
         return 
+    producto = productos[codigo]
     confirmacion = input(f" Esta seguro que desea eliminar: COD:{codigo} NOMBRE: {producto['nombre']}?   S/N : ")
     if confirmacion.upper()=='S':
      del productos[codigo]
@@ -167,8 +195,91 @@ def eliminar_producto(productos):
     else:
         print('eliminacion cancelada')
              
+def mostrar_reportes_productos(productos): #mostrar reportes de productos ( todos, por nombre o marca)
+    productos = cargar_productos()
+
+    print('*** REPORTES ***')
+
+    while True:
+        print('[1] Mostrar todos los productos')
+        print('[2] Buscar producto por palabra clave en el nombre')
+        print('[3] Buscar producto por palabra clave en la marca')
+        print('[0] Atrás')
+
+        opcion = int(input('Ingrese una opción: '))
+        match opcion:
+            case 1:
+                print('--- Todos los productos ---')
+                for codigo, producto in productos.items():
+                    print(f"COD:{codigo} | NOMBRE: {producto['nombre']} | MARCA: {producto['marca']} | PRESENTACION: {producto['presentacion']} | PRECIO: ${producto['precio']} | STOCK: {producto['stock']}")
+                  
+            case 2:
+                palabra_clave = input('Ingrese la palabra clave a buscar en el nombre del producto: ')
+                encontrado = False
+                for codigo, producto in productos.items():
+                    if palabra_clave.lower() in producto['nombre'].lower():
+                        print(f"COD: {codigo} | NOMBRE: {producto['nombre']} | MARCA: {producto['marca']} | PRESENTACION: {producto['presentacion']} | PRECIO: ${producto['precio']} | STOCK: {producto['stock']}")
+                        encontrado = True
+                if not encontrado:
+                    print(f"No se encontraron productos con la palabra clave '{palabra_clave}' en el nombre.")
+            case 3:
+                palabra_clave = input('Ingrese la palabra clave a buscar en la marca del producto: ')
+                encontrado = False
+                for codigo, producto in productos.items():
+                    if palabra_clave.lower() in producto['marca'].lower():
+                        print(f"COD: {codigo} | NOMBRE: {producto['nombre']} | MARCA: {producto['marca']} | PRESENTACION: {producto['presentacion']} | PRECIO: ${producto['precio']} / STOCK: {producto['stock']}")
+                        encontrado = True
+                if not encontrado:
+                    print(f"No se encontraron productos con la palabra clave '{palabra_clave}' en la marca.")
+            case 0:
+                return
+            case other:
+                print("Error! ❌ Ingrese una opción válida.")
+def mostrar_reportes(productos): # menu de reportes ( productos y usuarios)
+    productos = cargar_productos()
+
+    print('*** REPORTES ***')
+
+    while True:
+        print('[1] Reportes de productos')
+        print('[2] Reportes de usuarios')
+      
+        print('[0] Atrás')
+
+        opcion = int(input('Ingrese una opción: '))
+        match opcion:
+            case 1:
+                mostrar_reportes_productos(productos)
+                  
+            case 2:
+                mostrar_usuarios()
+                
+            case 0:
+                menu()
+            case other:
+                print("Error! ❌ Ingrese una opción válida.")
+
+
 #seccion de usuarios    
-           
+def menu_usuarios(): #menu de gestion de usuarios ( crear , modificar o eliminar usuario )
+    print('*** GESTION DE USUARIOS ***')
+    usuarios=cargar_usuarios()
+    while True:
+        print('[1] Agregar usuario')
+        print('[2] Modificar usuario')
+        print('[3] Eliminar usuario')
+        print('[0] Atras')
+        opcion=int(input('Ingrese una opcion: '))
+        match opcion:
+            case 1:
+                crear_usuario()
+            case 2:
+                modificar_usuario()
+            case 3:
+                eliminar_usuario()
+            case 0:
+                menu()
+         
 def mostrar_usuarios(): #mostrar usuarios
     usuarios = cargar_usuarios()
 
@@ -243,89 +354,7 @@ def mostrar_usuarios(): #mostrar usuarios
                 mostrar_reportes(usuarios)
             case other:
                 print("Error! ❌ Ingrese una opción válida.")
-def mostrar_reportes_productos(productos):
-    productos = cargar_productos()
-
-    print('*** REPORTES ***')
-
-    while True:
-        print('[1] Mostrar todos los productos')
-        print('[2] Buscar producto por palabra clave en el nombre')
-        print('[3] Buscar producto por palabra clave en la marca')
-        print('[0] Atrás')
-
-        opcion = int(input('Ingrese una opción: '))
-        match opcion:
-            case 1:
-                print('--- Todos los productos ---')
-                for codigo, producto in productos.items():
-                    print(f"COD:{codigo} | NOMBRE: {producto['nombre']} | MARCA: {producto['marca']} | PRESENTACION: {producto['presentacion']} | PRECIO: ${producto['precio']} | STOCK: {producto['stock']}")
-                  
-            case 2:
-                palabra_clave = input('Ingrese la palabra clave a buscar en el nombre del producto: ')
-                encontrado = False
-                for codigo, producto in productos.items():
-                    if palabra_clave.lower() in producto['nombre'].lower():
-                        print(f"COD: {codigo} | NOMBRE: {producto['nombre']} | MARCA: {producto['marca']} | PRESENTACION: {producto['presentacion']} | PRECIO: ${producto['precio']} | STOCK: {producto['stock']}")
-                        encontrado = True
-                if not encontrado:
-                    print(f"No se encontraron productos con la palabra clave '{palabra_clave}' en el nombre.")
-            case 3:
-                palabra_clave = input('Ingrese la palabra clave a buscar en la marca del producto: ')
-                encontrado = False
-                for codigo, producto in productos.items():
-                    if palabra_clave.lower() in producto['marca'].lower():
-                        print(f"COD: {codigo} | NOMBRE: {producto['nombre']} | MARCA: {producto['marca']} | PRESENTACION: {producto['presentacion']} | PRECIO: ${producto['precio']} / STOCK: {producto['stock']}")
-                        encontrado = True
-                if not encontrado:
-                    print(f"No se encontraron productos con la palabra clave '{palabra_clave}' en la marca.")
-            case 0:
-                return
-            case other:
-                print("Error! ❌ Ingrese una opción válida.")
-def mostrar_reportes(productos):
-    productos = cargar_productos()
-
-    print('*** REPORTES ***')
-
-    while True:
-        print('[1] Reportes de productos')
-        print('[2] Reportes de usuarios')
-      
-        print('[0] Atrás')
-
-        opcion = int(input('Ingrese una opción: '))
-        match opcion:
-            case 1:
-                mostrar_reportes_productos(productos)
-                  
-            case 2:
-                mostrar_usuarios()
-                
-            case 0:
-                menu()
-            case other:
-                print("Error! ❌ Ingrese una opción válida.")
-def menu_usuarios():
-    print('*** GESTION DE USUARIOS ***')
-    usuarios=cargar_usuarios()
-    while True:
-        print('[1] Agregar usuario')
-        print('[2] Modificar usuario')
-        print('[3] Eliminar usuario')
-        print('[0] Atras')
-        opcion=int(input('Ingrese una opcion: '))
-        match opcion:
-            case 1:
-                crear_usuario()
-            case 2:
-                modificar_usuario()
-            case 3:
-                eliminar_usuario()
-            case 0:
-                menu()
-
-def modificar_usuario():
+def modificar_usuario(): #modifica un usuario y los datos se guardan en usuarios.json
     usuarios = cargar_usuarios()
 
     print('*** MODIFICAR USUARIO ***')
@@ -344,9 +373,11 @@ def modificar_usuario():
         return
 
     print('Valores actuales del usuario:')
+    
     print(f"Nombre: {usuarios[id_usuario]['nombre']}")
     print(f"Apellido: {usuarios[id_usuario]['apellido']}")
     print(f"DNI: {usuarios[id_usuario]['dni']}")
+    print(f"Usuario: {usuarios[id_usuario]['nombre_usuario']}")
     print(f"Contraseña: {usuarios[id_usuario]['password']}")
     print('-----------')
 
@@ -355,7 +386,8 @@ def modificar_usuario():
         print('[1] Nombre')
         print('[2] Apellido')
         print('[3] DNI')
-        print('[4] Contraseña')
+        print('[4] Usuario')
+        print('[5] Contraseña')
         print('[0] Finalizar')
         opcion = int(input('Ingrese una opción: '))
         match opcion:
@@ -369,6 +401,9 @@ def modificar_usuario():
                 dni_nuevo = input('Ingrese el nuevo DNI: ')
                 usuarios[id_usuario]['dni'] = dni_nuevo
             case 4:
+                nombre_usuario = input('Ingrese el nuevo nombre de usuario: ')
+                usuarios[id_usuario]['nombre_usuario'] = nombre_usuario
+            case 5:
                 password = input('Ingrese la nueva contraseña: ')
                 usuarios[id_usuario]['password'] = password
             case 0:
@@ -379,7 +414,7 @@ def modificar_usuario():
     guardar_usuarios(usuarios)
     print('Usuario modificado. ✔')
 
-def eliminar_usuario():
+def eliminar_usuario(): #elimina un usuario del archivo usuarios.json
     usuarios = cargar_usuarios()
     print('*** ELIMINAR USUARIO ***')
     print('Listado de usuarios')
@@ -408,34 +443,10 @@ def eliminar_usuario():
     else:
         print('Eliminación cancelada.')
 
+
+
+
 #seccion carrito de ventas
-def menu_productos():
-    print('*** GESTION DE PRODUCTOS ***')
-
-    productos = cargar_productos()
-    contador = max([int(id) for id in productos.keys()], default=0) + 1
-    while True:
-        print('[1] Agregar producto')
-        print('[2] Modificar producto')
-        print('[3] Eliminar producto')
-        print('[4] Reportes')
-        print('[0] Atras')
-        opcion = int(input('Ingrese una opcion '))
-        match opcion:
-          case 1:
-            contador = ingresar_producto(productos, contador)
-          case 2:
-            modificar_producto(productos)
-          case 3:
-            eliminar_producto(productos)
-          case 4:
-           mostrar_reportes(productos)
-
-          case 0:
-            menu()
-          case other:
-                 print("Error! ❌ Ingrese una opcion valida")
-carrito = {}
 def agregar_producto_al_carrito(carrito, productos, codigo_producto, cantidad):
     if codigo_producto not in productos:
         print('El código del producto no existe.')
@@ -540,7 +551,7 @@ def finalizar_venta(productos, carrito):
      guardar_productos(productos)
 
 
-def menu():
+def menu(): #menu principal
     productos = cargar_productos()
     contador = max([int(id) for id in productos.keys()], default=0) + 1
 
@@ -571,7 +582,7 @@ def menu():
         
              
             
-def pantalla_inicio():
+def pantalla_inicio(): #pantalla de inicio, donde se inicia sesion
     print('****LOGIN****')
     print('[1] Crear usuario')
     print('[2] Iniciar sesion')

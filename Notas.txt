@@ -1,0 +1,14 @@
+Integrantes:
+- Juan Jose La Terra
+
+Tematica
+- Farmacia
+
+Tecnologias
+- Python
+- Json
+- Github
+
+Descripcion
+La aplicacion trata sobre la gestion de productos para una farmacia, donde el usuario debera registrarse e iniciar sesion para poder acceder a la gestion. Una vez que inicia sesion podra tendra acceso a la gestion de productos, podra cargar productos en el sistema, modificarlos o eliminarlos,tambien cuenta con la opcion de gestionar usuarios, donde podra dar de alta un usuario, modificar sus datos o eliminarlo.
+El sistema  cuenta con un apartado de REPORTES, donde se pueden ver todos los productos y usuarios, se podra realizar busquedas especificas tanto para los productos como para los usuarios.
