@@ -1,10 +1,18 @@
 import json
 
+def guardar_proveedores(proveedores): #guarda los proveedores en el archivo proveedores.json
+    with open('proveedores.json','w') as archivo:
+        json.dump(proveedores,archivo) 
+def cargar_proveedores():# carga los datos de los proveedores y son cargados en proveedores.json
+    try:
+        with open('proveedores.json','r') as archivo:
+            return json.load(archivo)
+    except FileNotFoundError:
+        return {}
 
 def guardar_usuarios(usuarios): #guarda los usuarios en el archivo usuarios.json
     with open('usuarios.json', 'w') as archivo:
         json.dump(usuarios, archivo)
-
 def cargar_usuarios(): #carga los datos de los usuarios y son cargados en usuarios.json
     try:
         with open('usuarios.json', 'r') as archivo:
@@ -48,7 +56,6 @@ def iniciar_sesion(): #iniciar sesion con los datos del usuario
         password = input('Ingrese su contraseña: ')
         if password == usuario['password']:
             print('Inicio de sesión correcto')
-            carrito = []
             menu()
         else:
             print('Error! ❌ Contraseña incorrecta')
@@ -69,7 +76,7 @@ def cargar_productos(): #carga los datos de los productos y son cargados en prod
 def guardar_productos(productos): #guarda los productos en el archivo productos.json
     with open('productos.json', 'w') as archivo:
         json.dump(productos, archivo)
-def menu_productos():
+def menu_productos(): #Menu gestion de productos (crear, modifica, eliminar producto)
     print('*** GESTION DE PRODUCTOS ***')
 
     productos = cargar_productos()
@@ -92,7 +99,7 @@ def menu_productos():
            mostrar_reportes(productos)
 
           case 0:
-            menu()
+            return
           case other:
                  print("Error! ❌ Ingrese una opcion valida")
 carrito = {}
@@ -114,13 +121,13 @@ def modificar_producto(productos): #modifica un producto de la lista productos.j
     print('*** MODIFICAR PRODUCTO ****')
     print('Listado de productos:')
     for codigo, producto in productos.items():
-        print(f"{codigo}: {producto['nombre']}  STOCK:{producto['stock']}")
+        print(f"{codigo}: {producto['nombre']}  MARCA: {producto['marca']}  PRESENTACION: {producto['presentacion']} STOCK:{producto['stock']}")
     
     codigo = input('Ingrese el código del producto a modificar: ')
     if codigo not in productos:
         print('El código no existe.')
         return
-    
+    print()
     print('Valores actuales del producto:')
     print(f"Nombre: {productos[codigo]['nombre']}")
     print(f"Marca: {productos[codigo]['marca']}")
@@ -193,18 +200,18 @@ def eliminar_producto(productos): #elimina un producto de la lista productos.js
      guardar_productos(productos)
      print('Producto eliminado. ✔')
     else:
-        print('eliminacion cancelada')
+        print('Eliminacion cancelada')
              
 def mostrar_reportes_productos(productos): #mostrar reportes de productos ( todos, por nombre o marca)
     productos = cargar_productos()
 
-    print('*** REPORTES ***')
+    print('*** REPORTES DE PRODUCTOS ***')
 
     while True:
         print('[1] Mostrar todos los productos')
         print('[2] Buscar producto por palabra clave en el nombre')
         print('[3] Buscar producto por palabra clave en la marca')
-        print('[0] Atrás')
+        print('[0] Atras')
 
         opcion = int(input('Ingrese una opción: '))
         match opcion:
@@ -235,7 +242,7 @@ def mostrar_reportes_productos(productos): #mostrar reportes de productos ( todo
                 return
             case other:
                 print("Error! ❌ Ingrese una opción válida.")
-def mostrar_reportes(productos): # menu de reportes ( productos y usuarios)
+def mostrar_reportes(productos): # menu de reportes ( productos, usuarios, proveedores)
     productos = cargar_productos()
 
     print('*** REPORTES ***')
@@ -243,16 +250,18 @@ def mostrar_reportes(productos): # menu de reportes ( productos y usuarios)
     while True:
         print('[1] Reportes de productos')
         print('[2] Reportes de usuarios')
-      
-        print('[0] Atrás')
+        print('[3] Reportes de proveedores')
+        print('[0] Atras')
 
-        opcion = int(input('Ingrese una opción: '))
+        opcion = int(input('Ingrese una opcion: '))
         match opcion:
             case 1:
                 mostrar_reportes_productos(productos)
                   
             case 2:
                 mostrar_usuarios()
+            case 3:
+                mostrar_proveedores()
                 
             case 0:
                 menu()
@@ -261,7 +270,7 @@ def mostrar_reportes(productos): # menu de reportes ( productos y usuarios)
 
 
 #seccion de usuarios    
-def menu_usuarios(): #menu de gestion de usuarios ( crear , modificar o eliminar usuario )
+def menu_usuarios(): #menu de gestion de usuarios ( crear, modificar o eliminar usuario )
     print('*** GESTION DE USUARIOS ***')
     usuarios=cargar_usuarios()
     while True:
@@ -278,18 +287,18 @@ def menu_usuarios(): #menu de gestion de usuarios ( crear , modificar o eliminar
             case 3:
                 eliminar_usuario()
             case 0:
-                menu()
+               return
          
 def mostrar_usuarios(): #mostrar usuarios
     usuarios = cargar_usuarios()
 
-    print('*** REPORTES USUARIOS ***')
+    print('*** REPORTES DE USUARIOS ***')
 
     while True:
         print('[1] Mostrar todos los usuarios')
         print('[2] Buscar usuario por palabra clave en el NOMBRE ')
         print('[3] Buscar usuario por palabra clave en el APELLIDO ')
-        print('[0] Atrás')
+        print('[0] Atras')
 
         opcion = int(input('Ingrese una opción: '))
         match opcion:
@@ -434,7 +443,7 @@ def eliminar_usuario(): #elimina un usuario del archivo usuarios.json
         return
 
     usuario = usuarios[id_usuario]
-    confirmacion = input(f"¿Está seguro que desea eliminar?\nID: {id_usuario}\nUsuario: {usuario['nombre_usuario']}\nNombre: {usuario['nombre']}\nApellido: {usuario['apellido']}\nS/N: ")
+    confirmacion = input(f"\nID: {id_usuario}\nUsuario: {usuario['nombre_usuario']}\nNombre: {usuario['nombre']}\nApellido: {usuario['apellido']}\n\n¿Está seguro que desea eliminar este usuario?  S/N: ")
     
     if confirmacion.upper() == 'S':
         del usuarios[id_usuario]
@@ -443,8 +452,222 @@ def eliminar_usuario(): #elimina un usuario del archivo usuarios.json
     else:
         print('Eliminación cancelada.')
 
+#seccion proveedores
+def menu_proveedores(): # Menu proveedores
+    print('*** GESTION DE PROVEEDORES ***') #menu gestion de proveedores ( nuevo, modificar, eliminar)
+    proveedores = cargar_proveedores()
+    contador = len(proveedores) + 1
+    while True:
+        print('[1] Agregar proveedor')
+        print('[2] Modificar proveedor')
+        print('[3] Eliminar proveedor')
+        print('[0] Atras')
+        opcion=int(input('Ingrese una opcion: '))
+        match opcion:
+            case 1:
+                nuevo_proveedor(proveedores, contador)
+            case 2:
+                modificar_proveedor()
+                
+            case 3:
+                eliminar_proveedor(proveedores)
+                
+            case 0:
+                return
+            case other:
+                print("Error! ❌ Ingrese una opcion valida")
+                menu_proveedores()
+def nuevo_proveedor(proveedores,contador):#crea un nuevo proveedor 
+    proveedores = cargar_proveedores()
+    
+    nombre_proveedor=input('Ingrese el nombre del proveedor: ')
+    nombre_contacto=input('Ingrese el nombre del contacto: ')
+    direccion=input('Ingrese la direccion del proveedor: ')
+    telefono=int(input('Ingrese el numero de telefono: '))
+    correo=input('Ingrese el correo electronico: ')
+    observaciones=input('Observaciones: ')
+    id_proveedor = str(contador)
+    proveedores[id_proveedor] = {
+        'nombre_proveedor': nombre_proveedor,
+        'nombre_contacto': nombre_contacto,
+        'direccion': direccion,
+        'telefono': telefono,
+        'correo': correo,
+        'observaciones': observaciones
+    }
+    guardar_proveedores(proveedores)
+    print('Proveedor guardado con exito. ✔ ')
+    contador + 1
+    menu_proveedores()
+def modificar_proveedor(): #Modificar un proveedor de la lista proveedores.json
+    proveedores = cargar_proveedores()
+    print('*** MODIFICAR USUARIO ***')
+    print('Listado de provvedores')
+    for id_proveedor, proveedor in proveedores.items():
+        print()
+        print(f'ID: {id_proveedor}')
+        print(f'NOMBRE: {proveedores[id_proveedor]["nombre_proveedor"]}')
+        print(f'CONTACTO: {proveedores[id_proveedor]["nombre_contacto"]}')
+        print(f'DIRECCION: {proveedores[id_proveedor]["direccion"]}')
+        print(f'TELEFONO: {proveedores[id_proveedor]["telefono"]}')
+        print(f'CORREO: {proveedores[id_proveedor]["correo"]}')
+        print(f'OBSERVACIONES: {proveedores[id_proveedor]["observaciones"]}')
+        print('------------')
 
+    id_proveedor = input('Ingrese el ID del proveedor a modificar: ')
+    if id_proveedor not in proveedores:
+        print('El proveedor no existe. ')
+        return
+    print('Valores actuales del proveedor. ')
+    print(f'NOMBRE: {proveedores[id_proveedor]["nombre_proveedor"]}')
+    print(f'CONTACTO: {proveedores[id_proveedor]["nombre_contacto"]}')
+    print(f'DIRECCION: {proveedores[id_proveedor]["direccion"]}')
+    print(f'TELEFONO: {proveedores[id_proveedor]["telefono"]}')
+    print(f'CORREO: {proveedores[id_proveedor]["correo"]}')
+    print(f'OBSERVACIONES: {proveedores[id_proveedor]["correo"]}')
+    print('------------')
 
+    while True:
+        print('¿Que desea modificar?: ')
+        print('[1] Nombre de proveedor')
+        print('[2] Nombre de contacto')
+        print('[3] Direccion')
+        print('[4] Telefono')
+        print('[5] Correo electronico')
+        print('[6] Observaciones')
+        print('[7] Todo')
+        print('[0] Finalizar')
+
+        opcion=int(input('Ingrese una opcion: '))
+        match opcion:
+            case 1:
+                nombre=input('Ingrese el nuevo nombre: ')
+                proveedores[id_proveedor]['nombre']=nombre
+            case 2:
+                nombre_contacto=input('Ingrese el nuevo nombre de contacto: ')
+                proveedores[id_proveedor]['nombre_contacto']=nombre_contacto
+            case 3:
+                direccion=input('Ingrese la nueva direccion: ')
+                proveedores[id_proveedor]['direccion']=direccion
+            case 4:
+                telefono=input('Ingrese el nuevo telefono: ')
+                proveedores[id_proveedor]['telefono']=telefono
+            case 5:
+                correo=input('Ingrese el nuevo correo electronico: ')
+                proveedores[id_proveedor]['correo']=correo
+            case 6:
+                observaciones=input('Ingrese la nueva observacion: ')
+                proveedores[id_proveedor]['observaciones']=observaciones
+            case 7:
+                nombre=input('Ingrese el nuevo nombre: ')
+                proveedores[id_proveedor]['nombre']=nombre
+                nombre_contacto=input('Ingrese el nuevo nombre de contacto: ')
+                proveedores[id_proveedor]['nombre_contacto']=nombre_contacto
+                direccion=input('Ingrese la nueva direccion: ')
+                proveedores[id_proveedor]['direccion']=direccion
+                telefono=input('Ingrese el nuevo telefono: ')
+                proveedores[id_proveedor]['telefono']=telefono
+                correo=input('Ingrese el nuevo correo electronico: ')
+                proveedores[id_proveedor]['correo']=correo
+                observaciones=input('Ingrese la nueva observacion: ')
+                proveedores[id_proveedor]['observaciones']=observaciones
+            case 0:
+                break
+            case other:
+                print("Error! ❌ Ingrese una opcion valida")
+def eliminar_proveedor(proveedores): #Eliminar un proveedor de la lista provveedores.json
+    print('*** ELIMINAR PROVEEDOR ***')
+    print('Listado de proveedores')
+    for id_proveedor, proveedor in proveedores.items():
+        print(f'{id_proveedor} : {proveedores[id_proveedor]["nombre_proveedor"]}')
+    print()
+    id_proveedor = input('Ingrese el código del proveedor a eliminar o 0 para cancelar: ')
+    if id_proveedor not in proveedores:
+        print('El proveedor no existe.')
+        return
+    proveedor = proveedores[id_proveedor]
+    confirmacion = input(f'¿Está seguro de que desea eliminar: ID:{id_proveedor}  {proveedores[id_proveedor]["nombre_proveedor"]}? (S/N): ')
+    if confirmacion.upper() == 'S':
+        del proveedores[id_proveedor]
+        guardar_proveedores(proveedores)
+        print('Proveedor eliminado con éxito. ✔')
+    else:
+        print('Eliminación cancelada.')
+def mostrar_proveedores(): #Menu de reportes de proveedores
+    print('*** REPORTES DE PROVEEDORES ***')
+    proveedores = cargar_proveedores()
+    while True:
+        print('[1] Mostrar todos los proveedores')
+        print('[2] Buscar proovedor por nombre')
+        print('[3] Buscar proovedor por insumo')
+        print('[0] Atras')
+
+        opcion=int(input('Ingrese una opcion: '))
+        match opcion:
+
+            case 1:
+                print('--- Todos los proveedores ---')
+                for id_proveedor, proveedor in proveedores.items():
+                    print(f"ID: {id_proveedor}")
+                    print(f"NOMBRE: {proveedor['nombre_proveedor']}")
+                    print(f"CONTACTO: {proveedor['nombre_contacto']}")
+                    print(f"DIRECCION: {proveedor['direccion']}")
+                    print(f"TELEFONO: {proveedor['telefono']}")
+                    print(f"CORREO ELECTRONICO: {proveedor['correo']}")
+                    print(f"OBSERVACIONES: {proveedor['observaciones']}")
+                    print('------------')
+            case 2:
+                proveedor = cargar_proveedores()
+                if not proveedores:
+                        print("No hay registros de proveedores.")
+                        return
+                    
+                palabra_clave = input("Ingrese la palabra clave a buscar en el nombre: ")
+                encontrado = False
+                    
+                for id_proveedor, proveedor in proveedores.items():
+                        if palabra_clave.lower() in proveedores[id_proveedor]['nombre_proveedor'].lower():
+                            print()
+                            print(f"ID: {id_proveedor}")
+                            print(f"NOMBRE: {proveedor['nombre_proveedor']}")
+                            print(f"CONTACTO: {proveedor['nombre_contacto']}")
+                            print(f"DIRECCION: {proveedor['direccion']}")
+                            print(f"TELEFONO: {proveedor['telefono']}")
+                            print(f"CORREO ELECTRONICO: {proveedor['correo']}")
+                            print(f"OBSERVACIONES: {proveedor['observaciones']}")
+                            print('------------')
+                            encontrado = True
+                    
+                if not encontrado:
+                        print(f"No se encontraron proveedores con la palabra clave '{palabra_clave}' en el nombre.")
+            case 3:
+                proveedor = cargar_proveedores()
+                if not proveedores:
+                        print("No hay registros de insumos.")
+                        return
+                    
+                palabra_clave = input("Ingrese la palabra clave a buscar por insumos: ")
+                encontrado = False
+                    
+                for id_proveedor, proveedor in proveedores.items():
+                        if palabra_clave.lower() in proveedores[id_proveedor]['observaciones'].lower():
+                            print()
+                            print(f"ID: {id_proveedor}")
+                            print(f"NOMBRE: {proveedor['nombre_proveedor']}")
+                            print(f"CONTACTO: {proveedor['nombre_contacto']}")
+                            print(f"DIRECCION: {proveedor['direccion']}")
+                            print(f"TELEFONO: {proveedor['telefono']}")
+                            print(f"CORREO ELECTRONICO: {proveedor['correo']}")
+                            print(f"OBSERVACIONES: {proveedor['observaciones']}")
+                            print('------------')
+                            encontrado = True
+                    
+                if not encontrado:
+                        print(f"No se encontraron insumos con la palabra clave '{palabra_clave}' en el nombre.")
+            case 0:
+                return
+            case other:
+                print("Error! ❌ Ingrese una opción válida.")
 
 #seccion carrito de ventas
 def agregar_producto_al_carrito(carrito, productos, codigo_producto, cantidad):
@@ -550,7 +773,25 @@ def finalizar_venta(productos, carrito):
      carrito.clear()
      guardar_productos(productos)
 
-
+def menu_gestion(): #menu de getion (productos, usuarios, proveedores)
+    print('*** MENU DE GESTION ***')
+    while True:
+        print('[1] Gestion de productos')
+        print('[2] Gestion de usuarios')
+        print('[3] Gestion de proveedores')
+        print('[0] Atras')
+        opcion=int(input('Ingrese una opcion: '))
+        match opcion:
+            case 1:
+                menu_productos()
+            case 2:
+                menu_usuarios()
+            case 3:
+                menu_proveedores()
+            case 0:
+                menu()
+            case other:
+                print("Error! ❌ Ingrese una opcion valida")
 def menu(): #menu principal
     productos = cargar_productos()
     contador = max([int(id) for id in productos.keys()], default=0) + 1
@@ -558,21 +799,19 @@ def menu(): #menu principal
     while True:
         print('*** BIENVENIDO AL MENU PRINCIPAL ****')
 
-        print('[1] Gestion de productos')
-        print('[2] Gestion de usuarios')
-        print('[3] Mostrar reportes')
-        print('[4] Ventas')
+        print('[1] Gestion ')
+        print('[2] Reportes')
+        print('[3] Ventas')
         print('[0] Salir')
         
         opcion = int(input('Ingrese una opción: '))
         match opcion:
             case 1:
-                menu_productos()
+                menu_gestion()
+            
             case 2:
-                menu_usuarios()
-            case 3:
                 mostrar_reportes(productos)
-            case 4:
+            case 3:
                 menu_ventas()
                
             case 0:
@@ -583,7 +822,7 @@ def menu(): #menu principal
              
             
 def pantalla_inicio(): #pantalla de inicio, donde se inicia sesion
-    print('****LOGIN****')
+    print('*** LOGIN ***')
     print('[1] Crear usuario')
     print('[2] Iniciar sesion')
     
